@@ -2,7 +2,7 @@
 
 # ghostty-themes-bar
 
-A thin, 3-line bottom-bar theme picker for [Ghostty](https://ghostty.org) (macOS).
+A thin, 3-line bottom-bar theme picker for [Ghostty](https://ghostty.org) (macOS, Linux).
 
 Unlike fullscreen pickers, `ghostty-themes-bar` keeps almost all of your screen
 intact. Ghostty reloads its color palette as you browse, so you see your
@@ -13,7 +13,8 @@ not a fake preview panel.
 
 - [Ghostty](https://ghostty.org) 1.0+ (config reload tested on 1.3.1)
 - [`ghostty-themes`](https://github.com/flyerAI2025/ghostty-themes) — used for config writes + reload
-- [`fzf`](https://github.com/junegunn/fzf) — `brew install fzf`
+- [`fzf`](https://github.com/junegunn/fzf) — `brew install fzf` (macOS), or your Linux distro's package manager
+- `zsh` — ships by default on macOS; install via your Linux distro's package manager if it isn't already present
 
 ## Install
 
@@ -58,7 +59,12 @@ GHOSTTY_THEMES_BAR_COLOR=dark ghostty-themes-bar  # dark themes only (dark | lig
 | `GHOSTTY_THEMES_CMD` | `ghostty-themes` | command used for config write + reload |
 | `GHOSTTY_THEMES_BAR_HEIGHT` | `3` | height of the fzf bar, in lines |
 | `GHOSTTY_THEMES_BAR_COLOR` | `all` | theme filter passed to `ghostty +list-themes --color=` |
-| `GHOSTTY_CONFIG` | `~/Library/Application Support/com.mitchellh.ghostty/config` | Ghostty config file to read the current theme from |
+| `GHOSTTY_CONFIG` | see below | Ghostty config file to read the current theme from |
+
+`GHOSTTY_CONFIG` defaults to `$XDG_CONFIG_HOME/ghostty/config` if `XDG_CONFIG_HOME`
+is set, else `~/Library/Application Support/com.mitchellh.ghostty/config` on
+macOS or `~/.config/ghostty/config` on Linux — mirroring Ghostty's own config
+resolution.
 
 ## How it works
 

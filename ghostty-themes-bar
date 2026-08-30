@@ -1,5 +1,5 @@
 #!/usr/bin/env zsh
-# ghostty-themes-bar — thin bottom-bar theme picker for Ghostty (macOS).
+# ghostty-themes-bar — thin bottom-bar theme picker for Ghostty (macOS, Linux).
 #
 # Unlike ghostty-themes (fullscreen + fake code preview), this keeps almost all
 # of your screen intact and reloads the real terminal colors as you browse, so
@@ -9,7 +9,21 @@
 
 readonly GT="${GHOSTTY_THEMES_CMD:-ghostty-themes}"
 readonly BAR_HEIGHT="${GHOSTTY_THEMES_BAR_HEIGHT:-3}"
-readonly CONFIG="${GHOSTTY_CONFIG:-$HOME/Library/Application Support/com.mitchellh.ghostty/config}"
+
+# Mirrors Ghostty's own config-file resolution: $XDG_CONFIG_HOME/ghostty/config
+# when XDG_CONFIG_HOME is set (any OS); otherwise a platform default. macOS
+# defaults to Application Support rather than ~/.config — that's Ghostty's own
+# behavior, not a quirk of this script.
+if [[ -n "${GHOSTTY_CONFIG:-}" ]]; then
+  CONFIG="$GHOSTTY_CONFIG"
+elif [[ -n "${XDG_CONFIG_HOME:-}" ]]; then
+  CONFIG="$XDG_CONFIG_HOME/ghostty/config"
+elif [[ "$OSTYPE" == darwin* ]]; then
+  CONFIG="$HOME/Library/Application Support/com.mitchellh.ghostty/config"
+else
+  CONFIG="$HOME/.config/ghostty/config"
+fi
+readonly CONFIG
 
 if ! command -v "$GT" >/dev/null 2>&1; then
   print -u2 "ghostty-themes-bar: need ghostty-themes on PATH (https://github.com/flyerAI2025/ghostty-themes)"
