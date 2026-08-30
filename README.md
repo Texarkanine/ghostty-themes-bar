@@ -1,3 +1,5 @@
+![demo](demo/demo.webp)
+
 # ghostty-themes-bar
 
 A thin, 3-line bottom-bar theme picker for [Ghostty](https://ghostty.org) (macOS).
@@ -6,8 +8,6 @@ Unlike fullscreen pickers, `ghostty-themes-bar` keeps almost all of your screen
 intact. Ghostty reloads its color palette as you browse, so you see your
 *actual* prompt, shell output, `git log`, vim buffer, etc. recolor live —
 not a fake preview panel.
-
-![demo](demo/demo.webp)
 
 ## Requirements
 
