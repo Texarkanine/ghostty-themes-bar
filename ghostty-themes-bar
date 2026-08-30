@@ -47,15 +47,28 @@ list_themes() {
     sed -E 's/ \((resources|user)\)$//'
 }
 
+themes="$(list_themes)"
+
+# If the active theme is in the list, start the cursor on it instead of row 1.
+# Bound to `load` (input stream fully read), not `start` (fires immediately on
+# launch) — with hundreds of themes, `start` races the async list load and
+# pos() clamps back to row 1 before the target line even exists yet.
+start_bind=()
+if [[ -n "$local_original" ]]; then
+  start_pos=$(print -r -- "$themes" | grep -n -F -x -- "$local_original" | head -1 | cut -d: -f1)
+  [[ -n "$start_pos" ]] && start_bind=(--bind "load:pos($start_pos)")
+fi
+
 trap "$GT --apply-preview ${escaped_original} 2>/dev/null" INT TERM HUP
 
 selected=$(
-  list_themes | fzf \
+  print -r -- "$themes" | fzf \
     --height "$BAR_HEIGHT" \
     --layout reverse \
     --border top \
     --info inline \
     --prompt 'theme> ' \
+    "${start_bind[@]}" \
     --bind "focus:execute-silent($GT --apply-preview {})" \
     --bind "esc:execute-silent($GT --apply-preview ${escaped_original})+abort" \
     --bind "ctrl-c:execute-silent($GT --apply-preview ${escaped_original})+abort"
