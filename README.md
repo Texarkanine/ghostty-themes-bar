@@ -7,21 +7,7 @@ intact. Ghostty reloads its color palette as you browse, so you see your
 *actual* prompt, shell output, `git log`, vim buffer, etc. recolor live —
 not a fake preview panel.
 
-<!-- TODO(tex): record a real screen capture (⌘⇧5 or QuickTime) from inside an
-     actual Ghostty window — a pty-based recorder (VHS, asciinema) can't
-     capture the live recolor effect, since Ghostty repaints already-rendered
-     content by swapping its palette at the terminal-emulator level; no new
-     bytes are written to the pty when that happens, so tools that only
-     record the byte/escape-code stream see nothing change.
-
-     Suggested sequence: `ls -hal`, `git status`, run `./ghostty-themes-bar`,
-     arrow through a handful of themes, then type two theme names to fuzzy-
-     search for them by name, Enter to confirm.
-
-     Convert the resulting .mov to a README-sized GIF with scripts/convert-demo.sh,
-     then drop it in demo/demo.gif and swap the placeholder below. -->
-
-![demo](demo/demo.gif)
+![demo](demo/demo.webp)
 
 ## Requirements
 
