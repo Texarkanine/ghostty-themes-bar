@@ -1,0 +1,89 @@
+#!/usr/bin/env zsh
+# ghostty-themes-bar — thin bottom-bar theme picker for Ghostty (macOS, Linux).
+#
+# Unlike ghostty-themes (fullscreen + fake code preview), this keeps almost all
+# of your screen intact and reloads the real terminal colors as you browse, so
+# you see your actual prompt, shell output, vim buffer, etc. recolored.
+#
+# Requires: ghostty-themes (for config write + reload), fzf, Ghostty 1.0+
+
+readonly GT="${GHOSTTY_THEMES_CMD:-ghostty-themes}"
+readonly BAR_HEIGHT="${GHOSTTY_THEMES_BAR_HEIGHT:-3}"
+
+# Mirrors Ghostty's own config-file resolution: $XDG_CONFIG_HOME/ghostty/config
+# when XDG_CONFIG_HOME is set (any OS); otherwise a platform default. macOS
+# defaults to Application Support rather than ~/.config — that's Ghostty's own
+# behavior, not a quirk of this script.
+if [[ -n "${GHOSTTY_CONFIG:-}" ]]; then
+  CONFIG="$GHOSTTY_CONFIG"
+elif [[ -n "${XDG_CONFIG_HOME:-}" ]]; then
+  CONFIG="$XDG_CONFIG_HOME/ghostty/config"
+elif [[ "$OSTYPE" == darwin* ]]; then
+  CONFIG="$HOME/Library/Application Support/com.mitchellh.ghostty/config"
+else
+  CONFIG="$HOME/.config/ghostty/config"
+fi
+readonly CONFIG
+
+if ! command -v "$GT" >/dev/null 2>&1; then
+  print -u2 "ghostty-themes-bar: need ghostty-themes on PATH (https://github.com/flyerAI2025/ghostty-themes)"
+  exit 1
+fi
+if ! command -v fzf >/dev/null 2>&1; then
+  print -u2 "ghostty-themes-bar: need fzf (brew install fzf)"
+  exit 1
+fi
+
+local_original=""
+if [[ -f "$CONFIG" ]]; then
+  local_original=$(grep -m1 '^theme *=' "$CONFIG" 2>/dev/null | sed 's/^theme *= *//')
+fi
+
+escaped_original=${(q)local_original}
+
+list_themes() {
+  local color="${GHOSTTY_THEMES_BAR_COLOR:-all}"
+  ghostty +list-themes --plain --color="$color" 2>/dev/null |
+    sed -E 's/ \((resources|user)\)$//'
+}
+
+themes="$(list_themes)"
+
+# If the active theme is in the list, start the cursor on it instead of row 1.
+# Bound to `load` (input stream fully read), not `start` (fires immediately on
+# launch) — with hundreds of themes, `start` races the async list load and
+# pos() clamps back to row 1 before the target line even exists yet.
+start_bind=()
+if [[ -n "$local_original" ]]; then
+  start_pos=$(print -r -- "$themes" | grep -n -F -x -- "$local_original" | head -1 | cut -d: -f1)
+  [[ -n "$start_pos" ]] && start_bind=(--bind "load:pos($start_pos)")
+fi
+
+trap "$GT --apply-preview ${escaped_original} 2>/dev/null" INT TERM HUP
+
+selected=$(
+  print -r -- "$themes" | fzf \
+    --height "$BAR_HEIGHT" \
+    --layout reverse \
+    --border top \
+    --info inline \
+    --prompt 'theme> ' \
+    "${start_bind[@]}" \
+    --bind "focus:execute-silent($GT --apply-preview {})" \
+    --bind "esc:execute-silent($GT --apply-preview ${escaped_original})+abort" \
+    --bind "ctrl-c:execute-silent($GT --apply-preview ${escaped_original})+abort"
+)
+
+trap - INT TERM HUP
+
+if [[ -n "$selected" ]]; then
+  "$GT" --apply "$selected"
+  print "Theme applied: $selected"
+else
+  "$GT" --apply-preview "$local_original"
+  if [[ -n "$local_original" ]]; then
+    print "Cancelled, restored: $local_original"
+  else
+    print "Cancelled, restored default"
+  fi
+fi
