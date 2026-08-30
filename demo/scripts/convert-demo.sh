@@ -14,8 +14,8 @@
 # that noise, and gif2webp on the result wins comfortably.
 #
 # Usage:
-#   scripts/convert-demo.sh path/to/raw-recording.mov [demo/demo.webp]
-#   scripts/convert-demo.sh --trim 5 --fps 8 path/to/raw-recording.mov
+#   demo/scripts/convert-demo.sh path/to/raw-recording.mov [demo/demo.webp]
+#   demo/scripts/convert-demo.sh --trim 5 --fps 8 path/to/raw-recording.mov
 #
 # Requires: ffmpeg (brew install ffmpeg), gif2webp (brew install webp)
 
